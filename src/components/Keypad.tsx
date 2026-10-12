@@ -39,8 +39,7 @@ export const Keypad: React.FC<KeypadProps> = ({
           aria-label="지우기"
           className="h-14 sm:h-16 text-xl sm:text-2xl font-bold rounded-2xl bg-rose-100 hover:bg-rose-200 active:scale-95 text-rose-800 border-2 border-rose-300 shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-1 touch-manipulation disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none"
         >
-          <Delete className="w-6 h-6" />
-          <span>⌫</span>
+          <Delete className="w-7 h-7" strokeWidth={2.5} />
         </button>
 
         {/* 0 button */}
