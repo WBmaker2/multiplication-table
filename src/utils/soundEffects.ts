@@ -7,13 +7,21 @@ function getAudioContext(): AudioContext | null {
     window.AudioContext ||
     (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
   if (!AudioContextClass) return null;
-  if (!audioCtx) {
-    audioCtx = new AudioContextClass();
+  try {
+    if (!audioCtx) {
+      audioCtx = new AudioContextClass();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(() => {});
+    }
+    return audioCtx;
+  } catch {
+    return null;
   }
-  if (audioCtx.state === 'suspended') {
-    audioCtx.resume();
-  }
-  return audioCtx;
+}
+
+export function _resetAudioContextForTesting(): void {
+  audioCtx = null;
 }
 
 export function getMuted(): boolean {

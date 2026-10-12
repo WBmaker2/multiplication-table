@@ -1,7 +1,19 @@
-import { describe, it, expect, vi } from 'vitest';
-import { getMuted, toggleMute, setMuted, playClickSound, playCorrectSound, playWrongSound } from '../src/utils/soundEffects';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import {
+  getMuted,
+  toggleMute,
+  setMuted,
+  playClickSound,
+  playCorrectSound,
+  playWrongSound,
+  _resetAudioContextForTesting,
+} from '../src/utils/soundEffects';
 
 describe('soundEffects', () => {
+  beforeEach(() => {
+    _resetAudioContextForTesting();
+  });
+
   it('toggles mute status correctly', () => {
     setMuted(false);
     expect(getMuted()).toBe(false);
@@ -49,7 +61,7 @@ describe('soundEffects', () => {
       destination: {},
       createOscillator: vi.fn(() => ({ ...mockOscillator })),
       createGain: vi.fn(() => ({ ...mockGain })),
-      resume: vi.fn(),
+      resume: vi.fn().mockReturnValue(Promise.resolve()),
     };
 
     const originalAudioContext = window.AudioContext;
@@ -57,12 +69,36 @@ describe('soundEffects', () => {
 
     try {
       playClickSound();
+      expect(mockAudioContext.resume).toHaveBeenCalled();
       playCorrectSound();
       playWrongSound();
       expect(mockAudioContext.createOscillator).toHaveBeenCalled();
       expect(mockAudioContext.createGain).toHaveBeenCalled();
     } finally {
       (window as unknown as { AudioContext: unknown }).AudioContext = originalAudioContext;
+      _resetAudioContextForTesting();
+    }
+  });
+
+  it('handles AudioContext constructor error or resume rejection gracefully', () => {
+    setMuted(false);
+    const mockAudioContext = {
+      state: 'suspended',
+      currentTime: 0,
+      destination: {},
+      createOscillator: vi.fn(),
+      createGain: vi.fn(),
+      resume: vi.fn().mockReturnValue(Promise.reject(new Error('Autoplay blocked'))),
+    };
+
+    const originalAudioContext = window.AudioContext;
+    (window as unknown as { AudioContext: unknown }).AudioContext = vi.fn(() => mockAudioContext);
+
+    try {
+      expect(() => playClickSound()).not.toThrow();
+    } finally {
+      (window as unknown as { AudioContext: unknown }).AudioContext = originalAudioContext;
+      _resetAudioContextForTesting();
     }
   });
 });
