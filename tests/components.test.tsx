@@ -87,6 +87,38 @@ describe('UI Components', () => {
       expect(input).toBeDisabled();
       expect(submitButton).toBeDisabled();
     });
+
+    it('does not trigger onSubmit on Enter when userAnswer is empty or disabled', () => {
+      const handleSubmit = vi.fn();
+      const question = { num1: 3, num2: 5, answer: 15 };
+      const { rerender } = render(
+        <QuizCard
+          question={question}
+          userAnswer=""
+          onChangeAnswer={() => {}}
+          onSubmit={handleSubmit}
+          isShaking={false}
+          disabled={false}
+        />
+      );
+
+      const input = screen.getByRole('textbox');
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+      expect(handleSubmit).not.toHaveBeenCalled();
+
+      rerender(
+        <QuizCard
+          question={question}
+          userAnswer="15"
+          onChangeAnswer={() => {}}
+          onSubmit={handleSubmit}
+          isShaking={false}
+          disabled={true}
+        />
+      );
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+      expect(handleSubmit).not.toHaveBeenCalled();
+    });
   });
 
   describe('FeedbackOverlay', () => {

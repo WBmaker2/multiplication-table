@@ -34,7 +34,9 @@ export const QuizCard: React.FC<QuizCardProps> = ({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      onSubmit();
+      if (!disabled && userAnswer.trim() !== '') {
+        onSubmit();
+      }
     }
   };
 
