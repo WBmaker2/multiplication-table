@@ -124,6 +124,7 @@ export const App: React.FC = () => {
   // Keyboard navigation & shortcut support
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
       if (feedback !== null) return;
 
       const isInput = (e.target as HTMLElement)?.tagName === 'INPUT';
@@ -141,7 +142,7 @@ export const App: React.FC = () => {
         if (/^[0-9]$/.test(e.key)) {
           e.preventDefault();
           handleKeyPress(e.key);
-        } else if (e.key === 'Backspace') {
+        } else if (e.key === 'Backspace' || e.key === 'Delete') {
           e.preventDefault();
           handleDelete();
         }

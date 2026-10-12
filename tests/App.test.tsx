@@ -85,12 +85,20 @@ describe('App Integration', () => {
     expect(card?.className).toMatch(/wiggle|shake/);
   });
 
-  it('handles physical keyboard typing and backspace via window events when input is not focused', () => {
+  it('handles physical keyboard typing, Delete key, and ignores modifier keys when input is not focused', () => {
     render(<App />);
     const input = screen.getByRole('textbox', { name: /정답 입력/i });
     input.blur();
 
     fireEvent.keyDown(window, { key: '7' });
+    expect(input).toHaveValue('7');
+
+    // Modifier keys should be ignored
+    fireEvent.keyDown(window, { key: '8', ctrlKey: true });
+    expect(input).toHaveValue('7');
+    fireEvent.keyDown(window, { key: '8', metaKey: true });
+    expect(input).toHaveValue('7');
+    fireEvent.keyDown(window, { key: '8', altKey: true });
     expect(input).toHaveValue('7');
 
     fireEvent.keyDown(window, { key: '8' });
@@ -101,6 +109,9 @@ describe('App Integration', () => {
 
     fireEvent.keyDown(window, { key: 'Backspace' });
     expect(input).toHaveValue('7');
+
+    fireEvent.keyDown(window, { key: 'Delete' });
+    expect(input).toHaveValue('');
   });
 
   it('handles correct answer submission, shows celebration, and advances to next question', () => {
